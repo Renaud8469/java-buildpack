@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# bin/compile <build-dir> <cache-dir> <env-dir>
+# bin/test-compile <build-dir> <cache-dir> <env-dir>
 
 # fail fast
 set -e
 
-BPLOG_PREFIX="buildpack.java"
+BPLOG_PREFIX="buildpack.java.ci"
 
 BP_DIR=$(cd $(dirname $0)/..; pwd) # absolute path
 BUILD_DIR=$1
@@ -19,4 +19,9 @@ export_env $ENV_DIR "." "JAVA_OPTS|JAVA_TOOL_OPTIONS"
 
 install_jdk ${BUILD_DIR}
 
-exit 0
+cd $BUILD_DIR
+
+cache_copy ".m2" $CACHE_DIR $BUILD_DIR
+run_mvn "test-compile" $BUILD_DIR $BUILD_DIR
+write_mvn_profile $BUILD_DIR
+cache_copy ".m2" $BUILD_DIR $CACHE_DIR

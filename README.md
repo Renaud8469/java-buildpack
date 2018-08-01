@@ -1,12 +1,12 @@
 Buildpack: Java
-===============
+=======
 
-This is a [Buildpack](http://doc.scalingo.com/buildpacks) for Java apps.
+This is a [Buildpack](https://doc.scalingo.com/buildpacks) for Java apps.
 It uses Maven 3.3.9 to build your application and OpenJDK 8 to run it. However, the JDK version can be configured as described below.
 
 ## How it works
 
-The buildpack will detect your app as Java if it has a `pom.xml` file in its root directory.  It will use Maven to execute the build defined by your `pom.xml` and download your dependencies. The `.m2` folder (local maven repository) will be cached between builds for faster dependency resolution. However neither the mvn executable or the .m2 folder will be available in your slug at runtime.
+The buildpack will detect your app as Java if it has a `pom.xml` file, or one of the other POM formats supports by the [Maven Polyglot](https://github.com/takari/polyglot-maven) plugin, in its root directory.  It will use Maven to execute the build defined by your `pom.xml` and download your dependencies. The `.m2` folder (local maven repository) will be cached between builds for faster dependency resolution. However neither the mvn executable or the .m2 folder will be available in your slug at runtime.
 
 ```
   $ ls
@@ -27,6 +27,10 @@ The buildpack will detect your app as Java if it has a `pom.xml` file in its roo
          [INFO] Building readmeTest 1.0-SNAPSHOT
          [INFO] ------------------------------------------------------------------------
 ```
+
+## Examples
+
+* [Tomcat Webapp-Runner Example](https://github.com/kissaten/webapp-runner-minimal)
 
 ## Configuration
 
@@ -52,16 +56,18 @@ Example:
 
 ### Choose a Maven Version
 
-The `system.properties` file also allows for `maven.version` entry
+You can define a specific version of Maven for Scalingo to use by adding the
+[Maven Wrapper](https://github.com/takari/maven-wrapper) to your project. When
+this buildpack detects the precense of a `mvnw` script and a `.mvn` directory,
+it will run the Maven Wrapper instead of the default `mvn` command.
+
+If you need to override this, the `system.properties` file also allows for a `maven.version` entry
 (regardless of whether you specify a `java.runtime.version` entry). For example:
 
 ```
 java.runtime.version=1.8
-maven.version=3.1.1
+maven.version=3.3.9
 ```
-
-Supported versions of Maven include 3.0.5, 3.1.1, 3.2.5 and 3.3.9. You can request new
-versions of Maven by submitting a pull request against `vendor/maven/sources.txt`.
 
 ### Customize Maven
 

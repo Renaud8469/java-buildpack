@@ -1,15 +1,12 @@
 #!/usr/bin/env bash
-# bin/compile <build-dir> <cache-dir> <env-dir>
+# bin/test <build-dir> <env-dir> <artifact-dir>
 
 # fail fast
 set -e
 
-BPLOG_PREFIX="buildpack.java"
-
 BP_DIR=$(cd $(dirname $0)/..; pwd) # absolute path
 BUILD_DIR=$1
-CACHE_DIR=$2
-ENV_DIR=$3
+ENV_DIR=$2
 
 source $BP_DIR/lib/common.sh
 source $BP_DIR/lib/maven.sh
@@ -17,6 +14,12 @@ source <(curl -s --retry 3 -L $BUILDPACK_STDLIB_URL)
 
 export_env $ENV_DIR "." "JAVA_OPTS|JAVA_TOOL_OPTIONS"
 
-install_jdk ${BUILD_DIR}
+cd $BUILD_DIR
 
-exit 0
+mvn_settings_opt="$(_mvn_settings_opt ${BUILD_DIR} ${BUILD_DIR})"
+
+if has_maven_wrapper $BUILD_DIR; then
+  ./mvnw -B ${mvn_settings_opt} test
+else
+  mvn -B ${mvn_settings_opt} test
+fi
